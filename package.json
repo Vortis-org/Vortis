@@ -13,8 +13,10 @@
     "@tonconnect/ui-react": "^2.0.9",
     "@twa-dev/sdk": "^6.7.1",
     "@vitejs/plugin-basic-ssl": "^1.0.1",
+    "lucide-react": "^0.464.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.0.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
