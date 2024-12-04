@@ -183,6 +183,7 @@ export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleSwipe = (direction: "left" | "right") => {
+    console.log(`Swiped ${direction}`);
     setCurrentIndex((prevIndex) => {
       if (prevIndex < dummyMarketDataArray.length - 1) {
         return prevIndex + 1;

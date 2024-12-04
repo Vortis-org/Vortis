@@ -12,7 +12,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   if (!isLoggedIn) {
-    return <Login />;
+    return <Login setIsLoggedIn={setIsLoggedIn} />;
   }
   return (
     <Navbar>
