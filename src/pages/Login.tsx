@@ -1,15 +1,10 @@
 import { useTonConnectUI } from "@tonconnect/ui-react";
 
-interface LoginProps {
-  setIsLoggedIn: (isLoggedIn: boolean) => void;
-}
-
-export default function Login({ setIsLoggedIn }: LoginProps) {
+export default function Login() {
   const [tonConnectUI, setOptions] = useTonConnectUI();
 
   const handleLogin = () => {
     tonConnectUI.openModal();
-    setIsLoggedIn(true);
     setOptions({});
   };
 

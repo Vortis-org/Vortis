@@ -6,14 +6,19 @@ import Postions from "./pages/Postions";
 import Profile from "./pages/Profile";
 import Create from "./pages/Create";
 import Login from "./pages/Login";
-import { useState } from "react";
 import Bet from "./pages/Bet";
+import { useTonAddress } from "@tonconnect/ui-react";
+import { useEffect } from "react";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const userAddress = useTonAddress();
 
-  if (!isLoggedIn) {
-    return <Login setIsLoggedIn={setIsLoggedIn} />;
+  useEffect(() => {
+    console.log(userAddress);
+  });
+
+  if (userAddress === "") {
+    return <Login />;
   }
   return (
     <Navbar>

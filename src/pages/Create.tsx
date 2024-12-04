@@ -8,20 +8,74 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { buildCreateMarketTransaction } from "@/lib/contractUtils";
+import { useTonConnectUI } from "@tonconnect/ui-react";
+import { TonConnectButton } from "@tonconnect/ui-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Create() {
+  const [loading, setLoading] = useState(false);
+  const [tonConnectUI] = useTonConnectUI();
+  const { toast } = useToast();
+
   const [formData, setFormData] = useState({
     description: "",
     predictionX: "",
     predictionY: "",
     endTime: new Date(),
+    image: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const endTimeBigInt = BigInt(formData.endTime.getTime());
-    console.log({ ...formData, endTime: endTimeBigInt });
+
+    if (!tonConnectUI.connected) {
+      toast({
+        title: "Connect Wallet",
+        description: "Please connect your wallet first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const endTimeBigInt = BigInt(
+        Math.floor(formData.endTime.getTime() / 1000)
+      );
+
+      const transaction = buildCreateMarketTransaction({
+        description: formData.description,
+        predictionX: formData.predictionX,
+        predictionY: formData.predictionY,
+        endTime: endTimeBigInt,
+      });
+
+      await tonConnectUI.sendTransaction(transaction);
+
+      toast({
+        title: "Success",
+        description: "Market created successfully!",
+      });
+
+      setFormData({
+        description: "",
+        predictionX: "",
+        predictionY: "",
+        endTime: new Date(),
+        image: "",
+      });
+    } catch (error) {
+      console.error("Error creating market:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create market. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,9 +86,10 @@ export default function Create() {
         className="max-w-md mx-auto"
       >
         <div className="border-black border-4 rounded-2xl p-6">
-          <h1 className="font-brice-semibold text-2xl mb-6">
-            Create Prediction
-          </h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="font-brice-semibold text-2xl">Create Prediction</h1>
+            <TonConnectButton />
+          </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
@@ -48,6 +103,7 @@ export default function Create() {
                 className="w-full p-3 border-2 border-black rounded-xl"
                 placeholder="Will it rain tomorrow?"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -63,6 +119,7 @@ export default function Create() {
                   className="w-full p-3 border-2 border-black rounded-xl"
                   placeholder="Yes"
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -77,6 +134,7 @@ export default function Create() {
                   className="w-full p-3 border-2 border-black rounded-xl"
                   placeholder="No"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -86,10 +144,12 @@ export default function Create() {
               <Popover>
                 <PopoverTrigger asChild>
                   <button
+                    type="button"
                     className={cn(
                       "w-full p-3 border-2 border-black rounded-xl flex items-center justify-start text-left font-normal",
                       !formData.endTime && "text-muted-foreground"
                     )}
+                    disabled={loading}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {formData.endTime ? (
@@ -112,13 +172,37 @@ export default function Create() {
               </Popover>
             </div>
 
+            <div>
+              <label className="block mb-2 font-medium">
+                Image URL (Optional)
+              </label>
+              <input
+                type="text"
+                value={formData.image}
+                onChange={(e) =>
+                  setFormData({ ...formData, image: e.target.value })
+                }
+                className="w-full p-3 border-2 border-black rounded-xl"
+                placeholder="https://example.com/image.jpg"
+                disabled={loading}
+              />
+            </div>
+
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: loading ? 1 : 1.02 }}
+              whileTap={{ scale: loading ? 1 : 0.98 }}
               type="submit"
-              className="mt-4 w-full bg-[#99ff88] text-black py-4 px-6 rounded-xl border-black border-2 font-semibold text-lg"
+              className="mt-4 w-full bg-[#99ff88] text-black py-4 px-6 rounded-xl border-black border-2 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || !tonConnectUI.connected}
             >
-              Create Prediction
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </div>
+              ) : (
+                "Create Prediction"
+              )}
             </motion.button>
           </form>
         </div>

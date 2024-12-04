@@ -1,3 +1,14 @@
+import { useTonConnectUI } from "@tonconnect/ui-react";
+
 export default function Profile() {
-  return <div>Profile</div>;
+  const [tonConnectUI] = useTonConnectUI();
+
+  const handleWalletDisconnect = async () => {
+    await tonConnectUI.disconnect();
+  };
+  return (
+    <div>
+      <button onClick={handleWalletDisconnect}>Disconnect Wallet</button>
+    </div>
+  );
 }
