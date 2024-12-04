@@ -12,11 +12,11 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ children }) => {
   return (
-    <nav>
+    <nav className="z-40">
       <div className="fixed top-0 left-0 right-0 flex flex-row justify-between items-center bg-[#efe7f7] border-black border-b-2">
         <div className="inline-flex items-center gap-2 p-4">
           <img src="/logo-black.png" alt="Vortis" className="w-8 h-8" />
-          <span className="font-brice-black text-xl">Vortis</span>
+          <span className="font-brice-black text-2xl">Vortis</span>
         </div>
       </div>
       <div>{children}</div>

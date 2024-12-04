@@ -8,6 +8,7 @@ import {
   PanInfo,
 } from "framer-motion";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Market {
   id: BigInt;
@@ -138,7 +139,7 @@ const SwipeableCard = ({
         <img
           src={market.image}
           alt="market"
-          className="w-full h-[75vh] object-cover rounded-xl select-none"
+          className="w-full h-[70vh] object-cover rounded-xl select-none"
           draggable="false"
         />
         <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-black via-transparent to-transparent" />
@@ -181,9 +182,12 @@ const SwipeableCard = ({
 
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const navigate = useNavigate();
 
   const handleSwipe = (direction: "left" | "right") => {
-    console.log(`Swiped ${direction}`);
+    if (direction === "right") {
+      navigate(`/bet/${dummyMarketDataArray[currentIndex].id}`);
+    }
     setCurrentIndex((prevIndex) => {
       if (prevIndex < dummyMarketDataArray.length - 1) {
         return prevIndex + 1;
@@ -194,7 +198,7 @@ export default function Home() {
 
   return (
     <div className="px-4 pb-14">
-      <div className="relative h-[90vh]">
+      <div className="relative h-[70vh]">
         {dummyMarketDataArray.map((market, index) => {
           if (index < currentIndex || index > currentIndex + 1) return null;
 
