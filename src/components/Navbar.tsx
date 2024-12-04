@@ -1,10 +1,8 @@
 import {
   ChartBarBig,
   GalleryHorizontalEnd,
-  House,
   LayoutList,
   Plus,
-  Settings,
   UserRound,
 } from "lucide-react";
 
