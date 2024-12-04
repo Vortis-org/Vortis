@@ -11,3 +11,11 @@ interface Market {
   poolY: bigint;
   image: string;
 }
+
+interface Bet {
+  marketId: bigint;
+  better: string;
+  amount: bigint;
+  prediction: bigint;
+  claimed: boolean;
+}
