@@ -7,22 +7,9 @@ import {
   useAnimation,
   PanInfo,
 } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface Market {
-  id: BigInt;
-  description: string;
-  predictionX: string;
-  predictionY: string;
-  endTime: BigInt;
-  status: BigInt;
-  winningPrediction: BigInt;
-  totalPool: BigInt;
-  poolX: BigInt;
-  poolY: BigInt;
-  image: string;
-}
+import { TonClient, Address } from "@ton/ton";
 
 const dummyMarketDataArray: Market[] = [
   {
@@ -183,7 +170,73 @@ const SwipeableCard = ({
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const navigate = useNavigate();
+  const [market, setMarket] = useState<Market | null>(null);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState(null);
 
+  // Initialize TON client
+  const client = new TonClient({
+    endpoint: "https://toncenter.com/api/v2/jsonRPC",
+  });
+
+  const contractAddress = Address.parse(
+    "EQBb_tnQy8fQbmqVjq2dG6TmsCE_91wTmZ9EUlcCipeR8zIe"
+  );
+
+  const getMarket = async (marketId: any) => {
+    try {
+      // setLoading(true);
+      // setError(null);
+
+      const result = await client.runMethod(contractAddress, "getGetMarket", [
+        { type: "int", value: marketId },
+      ]);
+
+      if (result) {
+        const marketData = {
+          id: result.stack.readBigNumber(),
+          description: result.stack
+            .readCell()
+            .beginParse()
+            .loadBuffer(100)
+            .toString(),
+          predictionX: result.stack
+            .readCell()
+            .beginParse()
+            .loadBuffer(100)
+            .toString(),
+          predictionY: result.stack
+            .readCell()
+            .beginParse()
+            .loadBuffer(100)
+            .toString(),
+          endTime: result.stack.readBigNumber(),
+          status: result.stack.readBigNumber(),
+          totalPool: result.stack.readBigNumber(),
+          poolX: result.stack.readBigNumber(),
+          poolY: result.stack.readBigNumber(),
+          winningPrediction: result.stack.readBigNumber(),
+          image: "/default-image.jpeg", // Add a default image or fetch it if available
+        };
+        setMarket(marketData);
+      }
+    } catch (err) {
+      console.log("Error fetching market:", err);
+      // setError(err.message);
+      console.error("Error fetching market:", err);
+    } finally {
+      // setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch market with ID 1 on component mount
+    getMarket(1);
+  }, []);
+
+  useEffect(() => {
+    console.log(market);
+  });
   const handleSwipe = (direction: "left" | "right") => {
     if (direction === "right") {
       navigate(`/bet/${dummyMarketDataArray[currentIndex].id}`);

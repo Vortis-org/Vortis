@@ -36,7 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({ children }) => {
           <Plus />
         </a>
         <div className="relative flex flex-row justify-between px-5 w-full">
-          <a href="/postions" className="p-4">
+          <a href="/positions" className="p-4">
             <ChartBarBig size={25} />
           </a>
           <a href="/profile" className="p-4">

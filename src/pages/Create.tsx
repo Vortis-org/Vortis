@@ -9,10 +9,15 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { buildCreateMarketTransaction } from "@/lib/contractUtils";
+// import { buildCreateMarketTransaction } from "@/lib/contractUtils";
 import { useTonConnectUI } from "@tonconnect/ui-react";
 import { TonConnectButton } from "@tonconnect/ui-react";
 import { useToast } from "@/hooks/use-toast";
+import { toNano } from "@ton/ton";
+import { beginCell } from "@ton/core"; // Import TON Cell functions
+
+export const CONTRACT_ADDRESS =
+  "EQBb_tnQy8fQbmqVjq2dG6TmsCE_91wTmZ9EUlcCipeR8zIe";
 
 export default function Create() {
   const [loading, setLoading] = useState(false);
@@ -41,18 +46,30 @@ export default function Create() {
 
     try {
       setLoading(true);
-      const endTimeBigInt = BigInt(
-        Math.floor(formData.endTime.getTime() / 1000)
-      );
 
-      const transaction = buildCreateMarketTransaction({
-        description: formData.description,
-        predictionX: formData.predictionX,
-        predictionY: formData.predictionY,
-        endTime: endTimeBigInt,
+      const payloadCell = beginCell()
+        .storeUint(0, 32)
+        .storeUint(1n, 64)
+        .storeUint(BigInt(Math.floor(formData.endTime.getTime() / 1000)), 64)
+        .storeBuffer(Buffer.from(formData.description, "utf-8"))
+        .storeBuffer(Buffer.from(formData.predictionX, "utf-8"))
+        .storeBuffer(Buffer.from(formData.predictionY, "utf-8"))
+        .endCell();
+
+      const payloadBoc = payloadCell.toBoc().toString("base64");
+
+      const result = await tonConnectUI.sendTransaction({
+        validUntil: Date.now() + 1000000,
+        messages: [
+          {
+            address: CONTRACT_ADDRESS.toString(),
+            amount: toNano("0.5").toString(),
+            payload: payloadBoc,
+          },
+        ],
       });
 
-      await tonConnectUI.sendTransaction(transaction);
+      console.log("Transaction result:", result);
 
       toast({
         title: "Success",
