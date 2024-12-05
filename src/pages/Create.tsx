@@ -49,7 +49,7 @@ export default function Create() {
       setLoading(true);
 
       const payloadCell = beginCell()
-        .storeUint(0x1234, 32)
+        // .storeUint(0x1234, 32)
         .storeInt(Date.now(), 257)
         .storeRef(
           beginCell().storeBuffer(Buffer.from(formData.description)).endCell()

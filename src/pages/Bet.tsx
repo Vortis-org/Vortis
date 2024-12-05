@@ -39,7 +39,7 @@ export default function Bet() {
       setLoading(true);
 
       const payloadCell = beginCell()
-        .storeUint(0x2345, 32) // op code for PlaceBet
+        // .storeUint(0x2345, 32) // op code for PlaceBet
 
         .storeInt(BigInt(id || 0), 64)
         .storeInt(BigInt(prediction), 8)
