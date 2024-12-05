@@ -10,11 +10,12 @@ import {
 import { cn } from "@/lib/utils";
 import { CalendarIcon, Loader2 } from "lucide-react";
 // import { buildCreateMarketTransaction } from "@/lib/contractUtils";
-import { useTonConnectUI } from "@tonconnect/ui-react";
+import { CHAIN, useTonConnectUI } from "@tonconnect/ui-react";
 import { TonConnectButton } from "@tonconnect/ui-react";
 import { useToast } from "@/hooks/use-toast";
 import { toNano } from "@ton/ton";
 import { beginCell } from "@ton/core"; // Import TON Cell functions
+import { useTonAddress } from "@tonconnect/ui-react";
 
 export const CONTRACT_ADDRESS =
   "EQBb_tnQy8fQbmqVjq2dG6TmsCE_91wTmZ9EUlcCipeR8zIe";
@@ -23,13 +24,13 @@ export default function Create() {
   const [loading, setLoading] = useState(false);
   const [tonConnectUI] = useTonConnectUI();
   const { toast } = useToast();
+  const userAddress = useTonAddress();
 
   const [formData, setFormData] = useState({
     description: "",
     predictionX: "",
     predictionY: "",
     endTime: new Date(),
-    image: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,22 +49,30 @@ export default function Create() {
       setLoading(true);
 
       const payloadCell = beginCell()
-        .storeUint(0, 32)
-        .storeUint(1n, 64)
-        .storeUint(BigInt(Math.floor(formData.endTime.getTime() / 1000)), 64)
-        .storeBuffer(Buffer.from(formData.description, "utf-8"))
-        .storeBuffer(Buffer.from(formData.predictionX, "utf-8"))
-        .storeBuffer(Buffer.from(formData.predictionY, "utf-8"))
+        .storeUint(0x1234, 32)
+        .storeInt(Date.now(), 257)
+        .storeRef(
+          beginCell().storeBuffer(Buffer.from(formData.description)).endCell()
+        )
+        .storeRef(
+          beginCell().storeBuffer(Buffer.from(formData.predictionX)).endCell()
+        )
+        .storeRef(
+          beginCell().storeBuffer(Buffer.from(formData.predictionY)).endCell()
+        )
+        .storeInt(BigInt(Math.floor(formData.endTime.getTime() / 1000)), 257)
         .endCell();
 
       const payloadBoc = payloadCell.toBoc().toString("base64");
 
       const result = await tonConnectUI.sendTransaction({
-        validUntil: Date.now() + 1000000,
+        from: userAddress,
+        validUntil: Date.now() + 10000000000,
+        network: CHAIN.TESTNET,
         messages: [
           {
             address: CONTRACT_ADDRESS.toString(),
-            amount: toNano("0.5").toString(),
+            amount: toNano("0.05").toString(),
             payload: payloadBoc,
           },
         ],
@@ -81,7 +90,6 @@ export default function Create() {
         predictionX: "",
         predictionY: "",
         endTime: new Date(),
-        image: "",
       });
     } catch (error) {
       console.error("Error creating market:", error);
@@ -189,7 +197,7 @@ export default function Create() {
               </Popover>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block mb-2 font-medium">
                 Image URL (Optional)
               </label>
@@ -203,7 +211,7 @@ export default function Create() {
                 placeholder="https://example.com/image.jpg"
                 disabled={loading}
               />
-            </div>
+            </div> */}
 
             <motion.button
               whileHover={{ scale: loading ? 1 : 1.02 }}

@@ -8,7 +8,7 @@ import Login from "./pages/Login";
 import Bet from "./pages/Bet";
 import { useTonAddress } from "@tonconnect/ui-react";
 import { useEffect } from "react";
-import Positions from "./pages/Postions";
+import Positions from "./pages/Positions";
 
 function App() {
   const userAddress = useTonAddress();
